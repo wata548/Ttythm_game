@@ -6,32 +6,59 @@ using UnityEngine;
 public class NoteGenarator : MonoBehaviour
 {
     public GameObject notePrefab;
+    public Transform parent;
     [SerializeField] List<(List<string>,float)> chart;
-    [SerializeField] float noteGenDelay;
-    [SerializeField] short noteBarlength;
 
     List<Note> notes = new List<Note>();
+    const int keyLine = 4;
+    const int checkSpecialRhythm = keyLine + 2;
 
     Note CreateNote(int line, int beat = 1) {
-        Note newNote = new Note(Instantiate(notePrefab), line, beat);
+        Note newNote = new Note(Instantiate(notePrefab, parent), line, beat);
         return newNote;
     }
 
     IEnumerator GenarateRowChart(List<(List<string>, float)> chart, int columnIndex = 0, int rowIndex = 0)
     {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < keyLine; i++)
         {
-            Debug.Log(chart[columnIndex].Item1[rowIndex][i]);
-            if ((Note.NoteType)chart[columnIndex].Item1[rowIndex][i] == Note.NoteType.SHORT_NOTE)
+            if ((ChartReader.NoteType)chart[columnIndex].Item1[rowIndex][i] == ChartReader.NoteType.SHORT_NOTE)
             {
                 CreateNote(i);
             }
         }
 
-        yield return new WaitForSeconds(chart[columnIndex].Item2);
+        if (chart[columnIndex].Item1[rowIndex].Length >= checkSpecialRhythm)
+        {
+            if ((ChartReader.RhythmType)chart[columnIndex].Item1[rowIndex][keyLine + 1] == ChartReader.RhythmType.MISMATCHED)
+            {
+                Debug.Log(chart[columnIndex].Item1[rowIndex].Length);
+                yield return new WaitForSeconds(chart[columnIndex].Item2 / 2);
+            }
+
+            if ((ChartReader.RhythmType)(ChartReader.RhythmType)chart[columnIndex].Item1[rowIndex][keyLine + 1] == ChartReader.RhythmType.REST)
+            {
+                if(chart[columnIndex].Item1[rowIndex].Length == checkSpecialRhythm)
+                {
+                    yield return new WaitForSeconds(chart[columnIndex].Item2 * 2);
+                }
+
+                else
+                {
+                    string[] temp = chart[columnIndex].Item1[rowIndex].Split((char)ChartReader.RhythmType.REST);
+                    yield return new WaitForSeconds(chart[columnIndex].Item2 * (1 + int.Parse(temp[1])));
+                }
+
+            }
+        }
+
+        else
+        {
+            yield return new WaitForSeconds(chart[columnIndex].Item2);
+        }
 
 
-        if (rowIndex + 1 != chart[columnIndex].Item1.Count)
+            if (rowIndex + 1 != chart[columnIndex].Item1.Count)
         {
             StartCoroutine(GenarateRowChart(chart, columnIndex, rowIndex + 1));
         }
@@ -39,6 +66,7 @@ public class NoteGenarator : MonoBehaviour
         {
             if(columnIndex + 1 != chart.Count)
             {
+                Debug.Log(chart[columnIndex].Item2);
                 StartCoroutine(GenarateRowChart(chart, columnIndex + 1));
             }
 

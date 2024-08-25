@@ -7,6 +7,20 @@ using Unity.VisualScripting;
 
 public class ChartReader : MonoBehaviour
 {
+    public enum NoteType
+    {
+        NOT_NOTE = '.',
+        LONG_NOTE = 'l',
+        SHORT_NOTE = 's'
+    };
+
+    public enum RhythmType
+    {
+        MISMATCHED = '*',
+        REST = '#',
+        ROOF = '@'
+    }
+
     public float power = 10f;
 
     private static ChartReader instance = null;
@@ -62,7 +76,6 @@ public class ChartReader : MonoBehaviour
                 chartss.Add(temp);
             }
         }
-        //Debug.Log(chartss[0].Item1[0]);
     }
 
     private void Awake()

@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class NoteMovement : MonoBehaviour
 {
+    //scroll speed
     float power;
+
+    //where note destroy coordinateY
     const float deadLine = -6;
 
     private void Start()
@@ -14,8 +17,11 @@ public class NoteMovement : MonoBehaviour
 
     void Update()
     {
+        //linear move
         transform.position =  new Vector2(transform.position.x, transform.position.y - power * Time.deltaTime);
-        if(transform.position.y < deadLine)
+
+        //when note very low, destroy note
+        if(transform.position.y <= deadLine)
         {
             Destroy(this.gameObject);
         }
