@@ -22,7 +22,7 @@ public class ChartReader : MonoBehaviour
     //I will move this other script
     public float power = 10f;
 
-    public int keyLineCount = 10;
+    public short keyLineCount = 10;
 
         
     //file access

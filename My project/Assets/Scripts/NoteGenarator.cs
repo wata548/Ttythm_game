@@ -5,59 +5,88 @@ using UnityEngine;
 
 public class NoteGenarator : MonoBehaviour
 {
+    //set up
     public GameObject notePrefab;
     public Transform parent;
     [SerializeField] List<(List<string>,float)> chart;
 
+    //notes repository
     List<Note> notes = new List<Note>();
-    const int keyLine = 4;
-    const int checkSpecialRhythm = keyLine + 2;
 
+    //select line ex) 4k, 5k, 6k, 8k....
+    short keyLine;
+
+    //check special rhythm index
+    const short checkSpecialRhythmRange = 2;
+
+    /*sum lines and beat(it remember note is how long, if note is single note beatequal 1)*/
     Note CreateNote(int line, int beat = 1) {
-        Note newNote = new Note(Instantiate(notePrefab, parent), line, beat);
+        Note newNote = new Note(Instantiate(notePrefab, parent), line, beat, keyLine);
         return newNote;
     }
 
+    /*Tuple(charts(string type), seconnd per beat)*/
     IEnumerator GenarateRowChart(List<(List<string>, float)> chart, int columnIndex = 0, int rowIndex = 0)
     {
+        string thisChart = chart[columnIndex].Item1[rowIndex];
+
+        //read present line
         for (int i = 0; i < keyLine; i++)
         {
-            if ((ChartReader.NoteType)chart[columnIndex].Item1[rowIndex][i] == ChartReader.NoteType.SHORT_NOTE)
+            if ((ChartReader.NoteType)thisChart[i] == ChartReader.NoteType.SHORT_NOTE)
             {
                 CreateNote(i);
             }
         }
 
-        if (chart[columnIndex].Item1[rowIndex].Length >= checkSpecialRhythm)
+        //check using special rhythm
+        if (thisChart.Length >= checkSpecialRhythmRange + keyLine)
         {
-            if ((ChartReader.RhythmType)chart[columnIndex].Item1[rowIndex][keyLine + 1] == ChartReader.RhythmType.MISMATCHED)
+            char check = thisChart[keyLine - 1 + checkSpecialRhythmRange];
+
+            //process mismatch
+            if ((ChartReader.RhythmType)check == ChartReader.RhythmType.MISMATCHED)
             {
-                yield return new WaitForSeconds(chart[columnIndex].Item2 / 2);
+                //skip number
+                if (thisChart.Length == checkSpecialRhythmRange + keyLine)
+                {
+                    yield return new WaitForSeconds(chart[columnIndex].Item2 / 2);
+                }
+
+                //use number
+                else
+                {
+                    string[] temp = thisChart.Split((char)ChartReader.RhythmType.MISMATCHED);
+                    yield return new WaitForSeconds(chart[columnIndex].Item2 / (1 << (int.Parse(temp[1]))));
+                }
             }
 
-            if ((ChartReader.RhythmType)(ChartReader.RhythmType)chart[columnIndex].Item1[rowIndex][keyLine + 1] == ChartReader.RhythmType.REST)
+            //process rest
+            if ((ChartReader.RhythmType)check == ChartReader.RhythmType.REST)
             {
-                if(chart[columnIndex].Item1[rowIndex].Length == checkSpecialRhythm)
+                //skip number
+                if(thisChart.Length == checkSpecialRhythmRange + keyLine)
                 {
                     yield return new WaitForSeconds(chart[columnIndex].Item2 * 2);
                 }
 
+                //use number
                 else
                 {
                     string[] temp = chart[columnIndex].Item1[rowIndex].Split((char)ChartReader.RhythmType.REST);
                     yield return new WaitForSeconds(chart[columnIndex].Item2 * (1 + int.Parse(temp[1])));
                 }
-
             }
         }
 
+        //not use special rhythm
         else
         {
             yield return new WaitForSeconds(chart[columnIndex].Item2);
         }
 
 
-            if (rowIndex + 1 != chart[columnIndex].Item1.Count)
+        if (rowIndex + 1 != chart[columnIndex].Item1.Count)
         {
             StartCoroutine(GenarateRowChart(chart, columnIndex, rowIndex + 1));
         }
@@ -68,6 +97,7 @@ public class NoteGenarator : MonoBehaviour
                 StartCoroutine(GenarateRowChart(chart, columnIndex + 1));
             }
 
+            //I will delete this code. It cause infinty roof
             else 
                 StartCoroutine(GenarateRowChart(chart));
         }
@@ -75,6 +105,8 @@ public class NoteGenarator : MonoBehaviour
     void Start()
     {
         chart = ChartReader.Instance.charts;
+        keyLine = ChartReader.Instance.keyLineCount;
+        Note.SetNoteStartCoor(keyLine);
         StartCoroutine(GenarateRowChart(chart));
     }
 }

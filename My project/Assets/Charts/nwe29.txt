@@ -1,0 +1,17 @@
+6
+@10
+240
+s.ss.s *
+s....s
+s....s
+s.s..s
+s..s.s
+s....s
+s.s..s
+s....s
+s..s.s
+s.s..s
+s....s
+s....s
+ssssss
+~
