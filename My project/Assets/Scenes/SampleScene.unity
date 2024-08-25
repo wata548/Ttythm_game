@@ -270,7 +270,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   power: 10
-  fileName: nwe20.txt
+  keyLineCount: 10
+  fileName: nwe27.txt
 --- !u!4 &510879017
 Transform:
   m_ObjectHideFlags: 0

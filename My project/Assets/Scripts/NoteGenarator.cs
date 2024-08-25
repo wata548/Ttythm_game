@@ -32,7 +32,6 @@ public class NoteGenarator : MonoBehaviour
         {
             if ((ChartReader.RhythmType)chart[columnIndex].Item1[rowIndex][keyLine + 1] == ChartReader.RhythmType.MISMATCHED)
             {
-                Debug.Log(chart[columnIndex].Item1[rowIndex].Length);
                 yield return new WaitForSeconds(chart[columnIndex].Item2 / 2);
             }
 
@@ -66,7 +65,6 @@ public class NoteGenarator : MonoBehaviour
         {
             if(columnIndex + 1 != chart.Count)
             {
-                Debug.Log(chart[columnIndex].Item2);
                 StartCoroutine(GenarateRowChart(chart, columnIndex + 1));
             }
 
@@ -76,7 +74,7 @@ public class NoteGenarator : MonoBehaviour
     }
     void Start()
     {
-        chart = ChartReader.Instance.chartss;
+        chart = ChartReader.Instance.charts;
         StartCoroutine(GenarateRowChart(chart));
     }
 }
