@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Key : MonoBehaviour
+public class Key
 {
 
     KeyCode key;
@@ -71,4 +71,13 @@ public class Key : MonoBehaviour
     {
         return Input.GetKeyUp(key);
     }
+
+    /*private void Update()
+    {
+        keyDown = this.Down();
+        keyPressingRaw = this.PressingRaw();
+        keyUp = this.Up(); 
+
+        keyPressing = this.Pressing();
+    }*/
 }
