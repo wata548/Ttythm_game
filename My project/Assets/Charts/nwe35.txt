@@ -24,12 +24,12 @@ s.........s
 ...........
 ~
 800
-sssssssssss *
-sssssssssss *
-sssssssssss *
-sssssssssss *
-sssssssssss *
-sssssssssss *
-sssssssssss *
-sssssssssss *
+sssssssssss *4
+sssssssssss *4
+sssssssssss *4
+sssssssssss *4
+sssssssssss *4
+sssssssssss *4
+sssssssssss *4
+sssssssssss *4
 ~
