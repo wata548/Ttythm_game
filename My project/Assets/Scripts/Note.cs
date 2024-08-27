@@ -46,17 +46,22 @@ class Note
 
     public Note(GameObject prefab, int line, int length = 1, short sumLines = 4)
     {
-        this.noteLength = length;
         this.note = prefab;
+        Set(line, length, sumLines);
+    }
+
+    public void Set(int line, int length = 1, short sumLines = 4)
+    {
+        this.noteLength = length;
         presentChart[line].Enqueue(this);
 
         this.noteType = (length == 1 ? ChartReader.NoteType.SHORT_NOTE : ChartReader.NoteType.LONG_NOTE);
 
         //note place on line
-        prefab.transform.position = new Vector2(NOTE_START_COOR + NOTE_INTERVAL * line, TOP_NOTE_COOR);
+        note.transform.position = new Vector2(NOTE_START_COOR + NOTE_INTERVAL * line, TOP_NOTE_COOR);
 
         //fill color 
-        GameObject renderer = prefab.transform.Find("Renderer").gameObject;
+        GameObject renderer = note.transform.Find("Renderer").gameObject;
         SpriteRenderer colorChanger = renderer.GetComponent<SpriteRenderer>();
 
         if (sumLines % 2 == 1 && line == sumLines / 2)
@@ -76,7 +81,5 @@ class Note
                 colorChanger.color = ((sumLines - (1 + line)) % 2 == 0 ? Color.white : Color.blue);
             }
         }
-
-        //I will make long note
     }
 }
