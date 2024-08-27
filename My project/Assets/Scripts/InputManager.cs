@@ -8,7 +8,9 @@ public class InputManager : MonoBehaviour
 {
     List<Key> keys = new List<Key>();
     float judgeLine = -1.75f;
-
+    static float sum = 0f;
+    static int count = 0;
+    public float result = 0;
     InputManager()
     {
         keys.Add(new Key('d'));
@@ -30,9 +32,12 @@ public class InputManager : MonoBehaviour
                     Note temp = Note.presentChart[i].Peek();
                     check = temp.GetCoor().y - judgeLine;
                     Note.presentChart[i].Dequeue();
-                }
 
-                Debug.Log($"{i + 1}line {check}mm");
+                    Debug.Log($"{i + 1}line {check}mm");
+                    count++;
+                    sum += check;
+                    result = check / count;
+                }
             }
         }
     }
