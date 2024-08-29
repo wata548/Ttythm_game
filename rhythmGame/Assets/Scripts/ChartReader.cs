@@ -209,13 +209,23 @@ public class ChartReader : MonoBehaviour
         }
     }
 
-    public List<(List<string>, float)> Chart;
+    private List<(List<string>, float)> Chart;
+
+    private void Test(List<(List<string>, float)> chart)
+    {
+        for (int i = 0; i < chart.Count; i++)
+        {
+            Debug.Log(chart[i].Item2);
+            for (int j = 0; j < chart[i].Item1.Count; j++)
+            {
+                Debug.Log(chart[i].Item1[j]);
+            }
+        }
+    } 
 
     private void Start()
     {
         chartReader = new StreamReader(defaultAddress + fileName + ".txt");
         Chart = ReadChart();
-
-        Debug.Log(Chart[10].Item1[0]);
     }
 }
