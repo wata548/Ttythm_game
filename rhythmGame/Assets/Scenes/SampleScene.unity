@@ -273,7 +273,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb024d5d54877c34aa77acea1c531a87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fileName: new1.txt
+  fileName: new2
   sumLine: 0
   chart: []
 --- !u!1660057539 &9223372036854775807

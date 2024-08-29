@@ -31,12 +31,14 @@ public class ChartReader : MonoBehaviour
         sumLine = int.Parse(chartReader.ReadLine());
     }
 
-    private (List<string> partChart, float secondPerBeat) ReadPartChart()
+    private (List<string> partChart, float secondPerBeat, int repeatCount) ReadPartChart()
     {
         string bpmString = chartReader.ReadLine();
+        int repeatCount = 1;
 
         //if Chart want changing key, change key and 'bpmString' to remember bpm(string type)
-        bpmString = SetKey(bpmString);
+        bpmString = CheckAndSetSumLine(bpmString);
+        bpmString = CheckAndSetRepeatCount(bpmString, ref repeatCount);
 
         //Set bpm
         float bpm = float.Parse(bpmString);
@@ -63,9 +65,9 @@ public class ChartReader : MonoBehaviour
             }
 
         }
-        return (lines, secondPerBeat);
+        return (lines, secondPerBeat,repeatCount);
 
-        string SetKey(string key) {
+        string CheckAndSetSumLine(string key) {
             if (key[0] == (char)Gimmick.SET_KEY)
             {
                 this.sumLine = int.Parse(key.Split((char)Gimmick.SET_KEY)[1]);
@@ -74,6 +76,22 @@ public class ChartReader : MonoBehaviour
 
             return key;
         }
+        string CheckAndSetRepeatCount(string line, ref int repeat)
+        {
+            if (line[0] == (char)Gimmick.ROOF)
+            {
+                if (line.Length == 1)
+                    repeat = 2;
+
+                else
+                    repeat = int.Parse(line.Split((char)Gimmick.ROOF)[1]);
+
+                return chartReader.ReadLine();
+            }
+
+            return line;
+        }
+        
         int CheckRoof(ref string line)
         {
             (Gimmick, float) checkRoof = SpeacialGimmick(line);
@@ -174,7 +192,7 @@ public class ChartReader : MonoBehaviour
     public List<string> chart = new List<string>();
     private void Start()
     {
-        chartReader = new StreamReader(defaultAddress + fileName);
+        chartReader = new StreamReader(defaultAddress + fileName + ".txt");
         chart = ReadPartChart().Item1;
     }
 }
