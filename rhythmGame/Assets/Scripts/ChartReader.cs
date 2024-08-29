@@ -24,16 +24,37 @@ public class ChartReader : MonoBehaviour
         END_PART = '~'
     };
     
-    private void ReadChart()
+    private List<(List<string>, float)> ReadChart()
     {
-        if (chartReader == null) return;
+        List<(List<string>, float)> chart = new();
 
-        sumLine = int.Parse(chartReader.ReadLine());
+        while (true)
+        {
+            (List<string> partChart, float secondPerBeat, int repeatCount) temp = ReadPartChart();
+            
+            if(temp.partChart == null)
+            {
+                break;
+            }
+
+            for (int i = 0, size = temp.repeatCount; i < size; i++)
+            {
+                chart.Add((temp.partChart, temp.secondPerBeat));
+            }
+        }
+
+        return chart;
     }
 
     private (List<string> partChart, float secondPerBeat, int repeatCount) ReadPartChart()
     {
         string bpmString = chartReader.ReadLine();
+
+        if(bpmString == null)
+        {
+            return (null, 0, 0);
+        }
+
         int repeatCount = 1;
 
         //if Chart want changing key, change key and 'bpmString' to remember bpm(string type)
@@ -109,7 +130,6 @@ public class ChartReader : MonoBehaviour
             }
         }
     }
-
     private (Gimmick, float) SpeacialGimmick(string line, float secondPerBeat = 1)
     {
         (Gimmick rhythmType, int power) rhythm =  CheckSpeacialRhythm(line);
@@ -189,10 +209,13 @@ public class ChartReader : MonoBehaviour
         }
     }
 
-    public List<string> chart = new List<string>();
+    public List<(List<string>, float)> Chart;
+
     private void Start()
     {
         chartReader = new StreamReader(defaultAddress + fileName + ".txt");
-        chart = ReadPartChart().Item1;
+        Chart = ReadChart();
+
+        Debug.Log(Chart[10].Item1[0]);
     }
 }
