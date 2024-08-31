@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class NoteMovement : MonoBehaviour
 {
-    public float deadLine = -6;
-    public float scrollPower = 22;
+    public float deadLine = -60;
+    public float scrollPower = 10;
 
     Note note = null;
 

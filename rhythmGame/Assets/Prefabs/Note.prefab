@@ -99,4 +99,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   deadLine: -6
   scrollPower: 10
-  noteObject: {fileID: 0}

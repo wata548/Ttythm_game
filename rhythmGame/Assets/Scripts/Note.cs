@@ -18,7 +18,18 @@ public class Note : MonoBehaviour
     static bool creatFolder = false;
 
     public enum NoteType {
-        LongNote, SingleNote
+        VOID = '.',
+        
+        START_PRESS_NOTE = 's',
+        PRESS_NOTE = 'p', 
+        END_PRESS_NOTE = 'e',
+
+        SINGLE_NOTE = 'n', 
+
+        ALL_DIRECTION_FLICK_NOTE = 'a',
+        FRONT_DIRECTION_FLICK_NOTE = 'f',
+        LEFT_DIRECTION_FLICK_NOTE = 'l',
+        RIGHT_DIRECTION_FLICK_NOTE = 'r'
     };
 
     [SerializeField] bool active;
@@ -27,8 +38,12 @@ public class Note : MonoBehaviour
     [SerializeField] int line;
     public int Line { get { return line; } }
 
-    [SerializeField] int length;
     [SerializeField] NoteType noteType;
+    public NoteType thisNoteType
+    {
+        get { return noteType; }
+    }
+
     [SerializeField] GameObject noteObject;
 
     static public void MakeNoteFolder()
@@ -56,14 +71,12 @@ public class Note : MonoBehaviour
         }
     }
 
-    public GameObject Set(GameObject note, int line, int length = 1)
+    public GameObject Set(GameObject note, int line)
     {
         active = true;
 
         this.noteObject = note;
         this.line = line;
-        this.length = length;
-        this.noteType = (length == 1 ? NoteType.SingleNote : NoteType.LongNote);
         
         this.ChangeActive();
 
@@ -76,15 +89,13 @@ public class Note : MonoBehaviour
         return noteObject;
     }
 
-    public GameObject Set(int line, int length = 1)
+    public GameObject Set(int line)
     {
         active = true;
 
         this.ChangeActive();
 
         this.line = line;
-        this.length = length;
-        this.noteType = (length == 1 ? NoteType.SingleNote : NoteType.LongNote);
 
         SetNoteCoordinate(this.noteObject, this.line);
 

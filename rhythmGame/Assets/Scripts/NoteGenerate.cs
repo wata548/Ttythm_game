@@ -11,7 +11,6 @@ public class NoteGenerate : MonoBehaviour
     public List<Queue<GameObject>> activeNotes = new();
     public Queue<GameObject> deactiveNotes = new();
 
-    public float interval = 1f;
     public GameObject prefab;
 
     //It compose activeNotes
@@ -22,63 +21,45 @@ public class NoteGenerate : MonoBehaviour
         }
     }
 
-    public GameObject GenerateNote(int line, int length = 1)
+    public GameObject GenerateNote(int line, Note.NoteType notetype = Note.NoteType.SINGLE_NOTE)
     {
         if (deactiveNotes.Count == 0)
         {
-            return CopyGenerateNote(line, length);
+            return CopyGenerateNote(line);
         }
 
         else
         {
-            return RecycleGenerateNote(deactiveNotes.Dequeue(), line, length);
+            return RecycleGenerateNote(deactiveNotes.Dequeue(), line);
         }
 
     }
 
-    private GameObject CopyGenerateNote(int line, int length = 1)
+    private GameObject CopyGenerateNote(int line)
     {
         GameObject newNote = Instantiate(prefab);
 
         activeNotes[line].Enqueue(newNote);
 
         newNote.AddComponent<Note>()
-               .Set(newNote, line, length);
+               .Set(newNote, line);
 
         return newNote;
     }
 
-    private GameObject RecycleGenerateNote(GameObject noteObject, int line, int length = 1)
+    private GameObject RecycleGenerateNote(GameObject noteObject, int line)
     {
         activeNotes[line].Enqueue(noteObject);
 
         noteObject.GetComponent<Note>()
-                  .Set(line, length);
+                  .Set(line);
 
         return noteObject;
     }
-
-    //It will delete. It just test code.
-    IEnumerator wait()
-    {
-        yield return new WaitForSeconds(interval);
-
-        GenerateNote(Random.Range(0,22));
-
-        StartCoroutine(wait());
-    }
-
 
     private void Awake()
     {
         if(instance == null) 
             instance = this;
-    }
-
-    void Start()
-    {
-        Note.MakeNoteFolder();
-        SetKey(22);
-        StartCoroutine(wait());
     }
 }

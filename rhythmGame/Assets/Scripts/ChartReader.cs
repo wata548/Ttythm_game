@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEngine.U2D;
+using Unity.VisualScripting;
 
 public class ChartReader : MonoBehaviour
 {
@@ -24,112 +25,118 @@ public class ChartReader : MonoBehaviour
         END_PART = '~'
     };
     
-    private List<(List<string>, float)> ReadChart()
+    private List<(List<string> partChart, float secondPerBeat, int key)> ReadChart()
     {
-        List<(List<string>, float)> chart = new();
+        List<(List<string>, float, int)> chart = new();
 
         while (true)
         {
-            (List<string> partChart, float secondPerBeat, int repeatCount) temp = ReadPartChart();
+            (List<string> partChart, float secondPerBeat, int repeatCount, int key) partChartInformation = ReadPartChart();
             
-            if(temp.partChart == null)
+            if(partChartInformation.partChart == null)
             {
                 break;
             }
 
-            for (int i = 0, size = temp.repeatCount; i < size; i++)
+            for (int i = 0, size = partChartInformation.repeatCount; i < size; i++)
             {
-                chart.Add((temp.partChart, temp.secondPerBeat));
+                chart.Add((partChartInformation.partChart, partChartInformation.secondPerBeat, partChartInformation.key));
             }
         }
 
         return chart;
-    }
 
-    private (List<string> partChart, float secondPerBeat, int repeatCount) ReadPartChart()
-    {
-        string bpmString = chartReader.ReadLine();
-
-        if(bpmString == null)
+        (List<string> partChart, float secondPerBeat, int repeatCount, int key) ReadPartChart()
         {
-            return (null, 0, 0);
-        }
+            string bpmString = chartReader.ReadLine();
 
-        int repeatCount = 1;
-
-        //if Chart want changing key, change key and 'bpmString' to remember bpm(string type)
-        bpmString = CheckAndSetSumLine(bpmString);
-        bpmString = CheckAndSetRepeatCount(bpmString, ref repeatCount);
-
-        //Set bpm
-        float bpm = float.Parse(bpmString);
-        float secondPerBeat = 60 / bpm;
-
-        //repositories
-        string line;
-        List<string> lines = new List<string>();
-
-        while (true)
-        {
-            line = chartReader.ReadLine();
-
-            //part end check
-            if (line[0] == (char)Gimmick.END_PART)
+            if (bpmString == null)
             {
-                break;
+                return (null, 0, 0, 0);
             }
 
+            int repeatCount = 1;
+            int sumKey = sumLine;
 
-            for (int i = 0, size = CheckRoof(ref line); i < size; i++)
+            //if Chart want changing key, change key and 'bpmString' to remember bpm(string type)
+            bpmString = CheckAndSetSumLine(bpmString, ref sumKey);
+            bpmString = CheckAndSetRepeatCount(bpmString, ref repeatCount);
+
+            sumLine = sumKey;
+
+            //Set bpm
+            float bpm = float.Parse(bpmString);
+            float secondPerBeat = 60 / bpm;
+
+            //repositories
+            string line;
+            List<string> lines = new List<string>();
+
+            while (true)
             {
-                lines.Add(line);
+                line = chartReader.ReadLine();
+
+                //part end check
+                if (line[0] == (char)Gimmick.END_PART)
+                {
+                    break;
+                }
+
+
+                for (int i = 0, size = CheckRoof(ref line); i < size; i++)
+                {
+                    lines.Add(line);
+                }
+
+            }
+            return (lines, secondPerBeat, repeatCount, sumKey);
+
+            string CheckAndSetSumLine(string key, ref int sumKey)
+            {
+                if (key[0] == (char)Gimmick.SET_KEY)
+                {
+                    sumKey = int.Parse(key.Split((char)Gimmick.SET_KEY)[1]);
+                    return chartReader.ReadLine();
+                }
+
+                return key;
+            }
+            string CheckAndSetRepeatCount(string line, ref int repeat)
+            {
+                if (line[0] == (char)Gimmick.ROOF)
+                {
+                    if (line.Length == 1)
+                        repeat = 2;
+
+                    else
+                        repeat = int.Parse(line.Split((char)Gimmick.ROOF)[1]);
+
+                    return chartReader.ReadLine();
+                }
+
+                return line;
             }
 
-        }
-        return (lines, secondPerBeat,repeatCount);
-
-        string CheckAndSetSumLine(string key) {
-            if (key[0] == (char)Gimmick.SET_KEY)
+            int CheckRoof(ref string line)
             {
-                this.sumLine = int.Parse(key.Split((char)Gimmick.SET_KEY)[1]);
-                return chartReader.ReadLine();
-            }
+                (Gimmick, float) checkRoof = SpeacialGimmick(line);
 
-            return key;
-        }
-        string CheckAndSetRepeatCount(string line, ref int repeat)
-        {
-            if (line[0] == (char)Gimmick.ROOF)
-            {
-                if (line.Length == 1)
-                    repeat = 2;
+                if (checkRoof.Item1 == Gimmick.ROOF)
+                {
+                    int size = (int)checkRoof.Item2;
+                    line = line.Substring(0, sumLine);
+
+                    return size;
+                }
 
                 else
-                    repeat = int.Parse(line.Split((char)Gimmick.ROOF)[1]);
-
-                return chartReader.ReadLine();
-            }
-
-            return line;
-        }
-        
-        int CheckRoof(ref string line)
-        {
-            (Gimmick, float) checkRoof = SpeacialGimmick(line);
-
-            if(checkRoof.Item1 == Gimmick.ROOF)
-            {
-                int size = (int)checkRoof.Item2;
-                line = line.Substring(0, sumLine);
-
-                return size;
-            }
-
-            else {
-                return 1;
+                {
+                    return 1;
+                }
             }
         }
     }
+
     private (Gimmick, float) SpeacialGimmick(string line, float secondPerBeat = 1)
     {
         (Gimmick rhythmType, int power) rhythm =  CheckSpeacialRhythm(line);
@@ -208,14 +215,13 @@ public class ChartReader : MonoBehaviour
             }
         }
     }
-
-    private List<(List<string>, float)> Chart;
-
-    private void Test(List<(List<string>, float)> chart)
+   
+    private void TestCheck(List<(List<string>, float, int)> chart)
     {
         for (int i = 0; i < chart.Count; i++)
         {
             Debug.Log(chart[i].Item2);
+            Debug.Log(chart[i].Item3);
             for (int j = 0; j < chart[i].Item1.Count; j++)
             {
                 Debug.Log(chart[i].Item1[j]);
@@ -223,9 +229,71 @@ public class ChartReader : MonoBehaviour
         }
     } 
 
+
+    void GenerateNote(List<(List<string> partChart, float secondPerBeat, int key)> chart)
+    {
+        Note.MakeNoteFolder();
+
+        StartCoroutine(CoroutineGenerateNotes(chart));
+    }
+
+    IEnumerator CoroutineGenerateNotes(List<(List<string> partChart, float secondPerBeat, int key)> chart, int partIndex= 0, int partLineIndex = 0)
+    {
+        string thisPartLine = chart[partIndex].partChart[partLineIndex];
+        int thisKeys = chart[partIndex].key;
+        float thisSecondPerBeat = chart[partIndex].secondPerBeat;
+
+        NoteGenerate.Instance.SetKey();
+
+        for (int i = 0; i < thisKeys; i++)
+        {
+            Note.NoteType noteType = (Note.NoteType)thisPartLine[i];
+
+            if (noteType != Note.NoteType.VOID)
+            {
+                NoteGenerate.Instance.GenerateNote(i, noteType);
+
+            }
+        }
+
+        (Gimmick gimmick, float second) checkGimick = SpeacialGimmick(thisPartLine, thisSecondPerBeat);
+
+        if(checkGimick.gimmick != Gimmick.ROOF)
+        {
+            yield return new WaitForSeconds(checkGimick.second);
+        }
+
+        else {
+            yield return new WaitForSeconds(thisSecondPerBeat);
+
+        }
+
+        partLineIndex++;
+        if (partLineIndex >= chart[partIndex].partChart.Count)
+        {
+            partLineIndex = 0; 
+            partIndex++;
+
+            if(partIndex != chart.Count) 
+            {
+                StartCoroutine(CoroutineGenerateNotes(chart, partIndex, partLineIndex));
+                 
+            }
+        }
+        else StartCoroutine(CoroutineGenerateNotes(chart, partIndex, partLineIndex));
+
+
+
+    }
+
+    private List<(List<string>, float, int)> Chart;    
     private void Start()
     {
         chartReader = new StreamReader(defaultAddress + fileName + ".txt");
         Chart = ReadChart();
+
+        TestCheck(Chart);
+
+        GenerateNote(Chart);
     }
 }
