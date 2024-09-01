@@ -244,7 +244,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f86c87ee6a21584a91cab0793ec9056, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interval: 0.1
   prefab: {fileID: 5888530935909521927, guid: 42ef14ca647b96a4587f39db8b9c5b8b, type: 3}
 --- !u!4 &1903549291
 Transform:
@@ -273,7 +272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb024d5d54877c34aa77acea1c531a87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fileName: new5
+  fileName: new8
   sumLine: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

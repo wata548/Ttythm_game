@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class NoteGenerate : MonoBehaviour
@@ -11,6 +12,10 @@ public class NoteGenerate : MonoBehaviour
     public List<Queue<GameObject>> activeNotes = new();
     public Queue<GameObject> deactiveNotes = new();
 
+    //object pooling
+    public Queue<GameObject> activeVirtualNotes = new();
+    public Queue<GameObject> deactiveVirtualNotes = new();
+
     public GameObject prefab;
 
     //It compose activeNotes
@@ -21,42 +26,91 @@ public class NoteGenerate : MonoBehaviour
         }
     }
 
-    public GameObject GenerateNote(int line, Note.NoteType notetype = Note.NoteType.SINGLE_NOTE)
+    public GameObject GenerateNote(int line, float secondPerBeat, Note.NoteType noteType = Note.NoteType.SINGLE_NOTE)
     {
-        if (deactiveNotes.Count == 0)
+        switch (noteType) 
+        { 
+            case Note.NoteType.PRESS_NOTE:
+                return GenerateVirtualNote(line, secondPerBeat, noteType);
+
+            default:
+                return GenerateRealNote(line, secondPerBeat, noteType);
+
+        }
+        GameObject GenerateVirtualNote(int line, float secondPerBeat, Note.NoteType noteType = Note.NoteType.PRESS_NOTE)
         {
-            return CopyGenerateNote(line);
+            if (deactiveVirtualNotes.Count == 0)
+            {
+                return CopyGenerateVirtualNote(line, secondPerBeat, noteType);
+            }
+
+            else
+            {
+                return RecycleGenerateVirtualNote(deactiveVirtualNotes.Dequeue(), line, secondPerBeat, noteType);
+            }
+
+            GameObject CopyGenerateVirtualNote(int line, float secondPerBeat, Note.NoteType noteType = Note.NoteType.PRESS_NOTE)
+            {
+                GameObject newNote = Instantiate(prefab);
+                newNote.name = "LongNote";
+
+                activeVirtualNotes.Enqueue(newNote);
+
+                newNote.AddComponent<Note>()
+                       .Set(newNote, line, secondPerBeat, noteType);
+
+                return newNote;
+            }
+
+            GameObject RecycleGenerateVirtualNote(GameObject noteObject, int line, float secondPerBeat, Note.NoteType noteType = Note.NoteType.PRESS_NOTE)
+            {
+                activeVirtualNotes.Enqueue(noteObject);
+
+                noteObject.GetComponent<Note>()
+                          .Set(line, secondPerBeat, noteType);
+
+                return noteObject;
+            }
+
         }
 
-        else
+        GameObject GenerateRealNote(int line, float secondPerBeat, Note.NoteType noteType = Note.NoteType.SINGLE_NOTE)
         {
-            return RecycleGenerateNote(deactiveNotes.Dequeue(), line);
+            if (deactiveNotes.Count == 0)
+            {
+                return CopyGenerateNote(line, secondPerBeat, noteType);
+            }
+
+            else
+            {
+                return RecycleGenerateNote(deactiveNotes.Dequeue(), line, secondPerBeat, noteType);
+            }
+
+            GameObject CopyGenerateNote(int line, float secondPerBeat, Note.NoteType noteType = Note.NoteType.SINGLE_NOTE)
+            {
+                GameObject newNote = Instantiate(prefab);
+                newNote.name = "Note";
+
+                activeNotes[line].Enqueue(newNote);
+
+                newNote.AddComponent<Note>()
+                       .Set(newNote, line, secondPerBeat, noteType);
+
+                return newNote;
+            }
+
+            GameObject RecycleGenerateNote(GameObject noteObject, int line, float secondPerBeat, Note.NoteType noteType = Note.NoteType.SINGLE_NOTE)
+            {
+                activeNotes[line].Enqueue(noteObject);
+
+                noteObject.GetComponent<Note>()
+                          .Set(line, secondPerBeat, noteType);
+
+                return noteObject;
+            }
+
         }
-
     }
-
-    private GameObject CopyGenerateNote(int line)
-    {
-        GameObject newNote = Instantiate(prefab);
-
-        activeNotes[line].Enqueue(newNote);
-
-        newNote.AddComponent<Note>()
-               .Set(newNote, line);
-
-        return newNote;
-    }
-
-    private GameObject RecycleGenerateNote(GameObject noteObject, int line)
-    {
-        activeNotes[line].Enqueue(noteObject);
-
-        noteObject.GetComponent<Note>()
-                  .Set(line);
-
-        return noteObject;
-    }
-
     private void Awake()
     {
         if(instance == null) 

@@ -4,16 +4,20 @@ using UnityEngine;
 using System.IO;
 using UnityEngine.U2D;
 using Unity.VisualScripting;
+using System.Data;
 
 public class ChartReader : MonoBehaviour
 {
+    static public float ScrollPower = 10f;
+
+
     //file access
     private string defaultAddress = "Assets\\Charts\\";
     [SerializeField] string fileName;
 
     StreamReader chartReader = null;
 
-    public int sumLine;
+    private int sumLine;
 
     enum Gimmick
     {
@@ -27,6 +31,8 @@ public class ChartReader : MonoBehaviour
     
     private List<(List<string> partChart, float secondPerBeat, int key)> ReadChart()
     {
+        chartReader = new StreamReader(defaultAddress + fileName + ".txt");
+
         List<(List<string>, float, int)> chart = new();
 
         while (true)
@@ -215,20 +221,6 @@ public class ChartReader : MonoBehaviour
             }
         }
     }
-   
-    private void TestCheck(List<(List<string>, float, int)> chart)
-    {
-        for (int i = 0; i < chart.Count; i++)
-        {
-            Debug.Log(chart[i].Item2);
-            Debug.Log(chart[i].Item3);
-            for (int j = 0; j < chart[i].Item1.Count; j++)
-            {
-                Debug.Log(chart[i].Item1[j]);
-            }
-        }
-    } 
-
 
     void GenerateNote(List<(List<string> partChart, float secondPerBeat, int key)> chart)
     {
@@ -239,60 +231,100 @@ public class ChartReader : MonoBehaviour
 
     IEnumerator CoroutineGenerateNotes(List<(List<string> partChart, float secondPerBeat, int key)> chart, int partIndex= 0, int partLineIndex = 0)
     {
+        //split data on chart
         string thisPartLine = chart[partIndex].partChart[partLineIndex];
         int thisKeys = chart[partIndex].key;
         float thisSecondPerBeat = chart[partIndex].secondPerBeat;
 
-        NoteGenerate.Instance.SetKey();
+        FixSecondPerBeat();
 
-        for (int i = 0; i < thisKeys; i++)
+        NoteGenerate.Instance.SetKey(thisKeys);
+
+        GenerateThisLine();
+
+        yield return new WaitForSeconds(thisSecondPerBeat);
+        
+        //set indexes
+        if (SetUpForNextLine())
         {
-            Note.NoteType noteType = (Note.NoteType)thisPartLine[i];
+            StartCoroutine(CoroutineGenerateNotes(chart, partIndex, partLineIndex));
+        }
 
-            if (noteType != Note.NoteType.VOID)
+        else
+        {
+            //I don't know it make to unity stop
+            //StartCoroutine(DestroyDeactiveNotes());
+        }
+
+        void FixSecondPerBeat()
+        {
+            (Gimmick gimmick, float second) checkGimick = SpeacialGimmick(thisPartLine, thisSecondPerBeat);
+
+            if (checkGimick.gimmick != Gimmick.ROOF)
             {
-                NoteGenerate.Instance.GenerateNote(i, noteType);
-
+                thisSecondPerBeat = checkGimick.second;
             }
         }
 
-        (Gimmick gimmick, float second) checkGimick = SpeacialGimmick(thisPartLine, thisSecondPerBeat);
-
-        if(checkGimick.gimmick != Gimmick.ROOF)
+        void GenerateThisLine()
         {
-            yield return new WaitForSeconds(checkGimick.second);
-        }
-
-        else {
-            yield return new WaitForSeconds(thisSecondPerBeat);
-
-        }
-
-        partLineIndex++;
-        if (partLineIndex >= chart[partIndex].partChart.Count)
-        {
-            partLineIndex = 0; 
-            partIndex++;
-
-            if(partIndex != chart.Count) 
+            for (int i = 0; i < thisKeys; i++)
             {
-                StartCoroutine(CoroutineGenerateNotes(chart, partIndex, partLineIndex));
-                 
+                Note.NoteType noteType = (Note.NoteType)thisPartLine[i];
+
+                switch (noteType) 
+                {
+                    case Note.NoteType.SINGLE_NOTE:
+                    case Note.NoteType.END_PRESS_NOTE:
+                        NoteGenerate.Instance.GenerateNote(i, thisSecondPerBeat, noteType);
+                        break;
+
+                    case Note.NoteType.START_PRESS_NOTE:
+                    case Note.NoteType.MIDDLE_PRESS_NOTE:
+                        NoteGenerate.Instance.GenerateNote(i, thisSecondPerBeat, Note.NoteType.PRESS_NOTE);
+                        NoteGenerate.Instance.GenerateNote(i, thisSecondPerBeat, noteType);
+                        break;
+
+                }
             }
         }
-        else StartCoroutine(CoroutineGenerateNotes(chart, partIndex, partLineIndex));
 
+        bool SetUpForNextLine()
+        {
+            partLineIndex++;
+            if (partLineIndex >= chart[partIndex].partChart.Count)
+            {
+                partLineIndex = 0;
+                partIndex++;
 
+                Note.SumLines = thisKeys;
 
+                if (partIndex == chart.Count)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /*IEnumerator DestroyDeactiveNotes()
+        {
+            yield return new WaitForSeconds(2);
+
+            while (NoteGenerate.Instance.deactiveNotes.Count > 0)
+            {
+                Destroy(NoteGenerate.Instance.deactiveNotes.Peek());
+            }
+        }*/
     }
 
     private List<(List<string>, float, int)> Chart;    
     private void Start()
     {
-        chartReader = new StreamReader(defaultAddress + fileName + ".txt");
-        Chart = ReadChart();
+        NoteMovement.scrollPower = ScrollPower;
 
-        TestCheck(Chart);
+        Chart = ReadChart();
 
         GenerateNote(Chart);
     }
