@@ -224,8 +224,6 @@ public class ChartReader : MonoBehaviour
 
     void GenerateNote(List<(List<string> partChart, float secondPerBeat, int key)> chart)
     {
-        Note.MakeNoteFolder();
-
         StartCoroutine(CoroutineGenerateNotes(chart));
     }
 
@@ -322,6 +320,8 @@ public class ChartReader : MonoBehaviour
     private List<(List<string>, float, int)> Chart;    
     private void Start()
     {
+        //SetUp
+        Note.MakeNoteFolder();
         NoteMovement.scrollPower = ScrollPower;
 
         Chart = ReadChart();

@@ -1,8 +1,121 @@
 $4
-@123
-120
-n..s
-.n.m *
-nn.e
-nn..
+346
+nnnn 
+nnnn 
+.nnn 
+nnn. *
+n.nn @3
+n.nn 
+.nn.n @2
+n.n. #
+nn.. 
+n.n. #
+~
+331
+nnnn @2
+.nnn @1
+nn.. #
+nn.n 
+n.nn @3
+n..n 
+n.n. *
+n.nn 
+nnn. 
+n.nn #
+~
+296
+.nnn 
+nnnn @3
+n.nn 
+.nn.n #
+n.nn *
+n.nn 
+nn.n 
+nn.n #
+n.nn @2
+.nn.n #
+~
+280
+.nn.n 
+n.nn #
+nn.n 
+.n.n 
+nnnn 
+nn.n 
+.nnn @3
+nn.n @1
+nn.n 
+n.nn @2
+~
+251
+.nn.n @1
+n.nn #
+.nn.. 
+.nn.. @3
+nnnn *
+nnnn 
+.nn.. 
+n.nn #
+nnnn 
+nnnn 
+~
+345
+nnnn @3
+.n.n @1
+n.nn #
+n.nn *
+nnnn 
+n.n. #
+n.nn 
+nnnn #
+n.n. 
+nnnn @2
+~
+356
+n.nn @1
+nnnn @3
+.nn.. 
+.nn.n *
+nnnn #
+nn.n 
+n.nn 
+nnnn @2
+n.nn #
+.nnn 
+~
+313
+.nn.n @3
+n.nn #
+.nn.n @1
+nnn. 
+nnnn 
+n.nn @2
+nnnn *
+nnnn 
+.nnn 
+n.nn #
+~
+323
+n.n. 
+n.nn @2
+nn.n @3
+n.nn #
+n.n. *
+n.nn @1
+nnnn 
+nnn. #
+nnnn 
+nnn. 
+~
+253
+nnnn 
+nn.n #
+.nn.n *
+nnnn 
+nn.n 
+n.nn #
+nn.n @1
+nnnn 
+nnn. @3
+n.nn 
 ~
